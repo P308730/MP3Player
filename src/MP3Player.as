@@ -64,6 +64,7 @@ package
 			playButton.addEventListener(MouseEvent.MOUSE_DOWN, onButtonTouchDown);
 			pauseButton.addEventListener(MouseEvent.MOUSE_DOWN, onButtonTouchDown);
 			stopButton.addEventListener(MouseEvent.MOUSE_DOWN, onButtonTouchDown);
+			stage.addEventListener(MouseEvent.MOUSE_DOWN, onButtonTouchDown);
 			
 			progressMeter = new Timer(30);
 			progressMeter.start();
@@ -152,8 +153,19 @@ package
 					pausePosition = 0;
 					stopSong();
 				}
+			// click on the background to seek to progress point
+			} else if (event.currentTarget == stage && (
+				// make sure you're outside of the buttons
+				event.localY < screenHeight / 2 - screenWidth / 8 ||
+				event.localY > screenHeight / 2 + screenWidth / 8)) {
+				if (isPlaying) {
+					// stop before playing again just to clean up event listeners
+					stopSong();
+					pausePosition = event.localX / screenWidth * sound.length;
+					playSong();
+				}
 			}
-			drawButtons();
+			//drawButtons();
 		}
 		/**
 		 * A simpler helper function to start playing the song.<br>
