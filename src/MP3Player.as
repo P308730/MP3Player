@@ -7,6 +7,7 @@ package
 	import flash.events.*;
 	import flash.media.Sound;
 	import flash.media.SoundChannel;
+	import flash.media.SoundTransform;
 	import flash.utils.Timer;
 	
 	import flashx.textLayout.formats.BackgroundColor;
@@ -27,6 +28,9 @@ package
 		private var sound:Sound = new MySound;
 		// a SoundChannel instance
 		private var channel:SoundChannel;
+		// a SoundTransform instance
+		private var soundTrans:SoundTransform = new SoundTransform();
+		
 		private var isPlaying:Boolean = false;
 		private var pausePosition:Number = 0;
 		
@@ -37,6 +41,9 @@ package
 		private var screenHeight:int;
 		
 		private var progressMeter:Timer;
+		
+		private var touchedBackground:Boolean = false;
+		private var xDown:int, yDown:int;
 		
 		public function MP3Player()
 		{
@@ -65,6 +72,8 @@ package
 			pauseButton.addEventListener(MouseEvent.MOUSE_DOWN, onButtonTouchDown);
 			stopButton.addEventListener(MouseEvent.MOUSE_DOWN, onButtonTouchDown);
 			stage.addEventListener(MouseEvent.MOUSE_DOWN, onButtonTouchDown);
+			
+			stage.addEventListener(MouseEvent.MOUSE_UP, onTouchUp);
 			
 			progressMeter = new Timer(30);
 			progressMeter.start();
@@ -153,20 +162,48 @@ package
 					pausePosition = 0;
 					stopSong();
 				}
-			// click on the background to seek to progress point
+			// click on the background? see mouse up event for actions
 			} else if (event.currentTarget == stage && (
 				// make sure you're outside of the buttons
 				event.localY < screenHeight / 2 - screenWidth / 8 ||
 				event.localY > screenHeight / 2 + screenWidth / 8)) {
-				if (isPlaying) {
+				touchedBackground = true;
+				xDown = event.localX;
+				yDown = event.localY;
+			}
+			drawButtons();
+		}
+		/**
+		 * The method called when there is a mouse up event on the stage
+		 */
+		private function onTouchUp(event:MouseEvent):void {
+			// check that the background area was touched in the mouse down event
+			if (touchedBackground) {
+				// if the user has moved their finger (or mouse) vertically across 
+				// the screen, treat it as a volume control
+				if (Math.abs(yDown - event.localY) > screenHeight / 8) {
+					var volume:Number = soundTrans.volume;
+					var step:Number = 0.2
+					if (yDown > event.localY) {
+						volume += step;
+						if (volume > 1) volume = 1;
+					} else {
+						volume -= step;
+						if (volume < 0.1) volume = 0.1;
+					}
+					soundTrans.volume = volume;
+					channel.soundTransform = soundTrans;
+				// otherwise seek to position
+				} else if (isPlaying) {
 					// stop before playing again just to clean up event listeners
 					stopSong();
 					pausePosition = event.localX / screenWidth * sound.length;
 					playSong();
 				}
+				touchedBackground = false;
 			}
-			drawButtons();
 		}
+		
 		/**
 		 * A simple helper function to start playing the song.<br>
 		 * Also attaches the listener for the sound complete event.
