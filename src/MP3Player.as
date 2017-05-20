@@ -1,10 +1,12 @@
 package
 {
+	import flash.display.GradientType;
 	import flash.display.Graphics;
 	import flash.display.Sprite;
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
 	import flash.events.*;
+	import flash.geom.Matrix;
 	import flash.media.Sound;
 	import flash.media.SoundChannel;
 	import flash.media.SoundTransform;
@@ -77,7 +79,7 @@ package
 			
 			progressMeter = new Timer(30);
 			progressMeter.start();
-			progressMeter.addEventListener(TimerEvent.TIMER, drawProgress);
+			progressMeter.addEventListener(TimerEvent.TIMER, drawStage);
 			
 			
 		}
@@ -234,9 +236,9 @@ package
 		}
 		/**
 		 * This function is called regularly by an event timer to draw a progress bar across the
-		 * background of the app.
+		 * background of the app and the peak displays
 		 */
-		private function drawProgress(event:TimerEvent):void {
+		private function drawStage(event:TimerEvent):void {
 			graphics.clear();
 			// calculate what position in the song we are at
 			var complete:Number;
@@ -253,6 +255,22 @@ package
 			graphics.beginFill(stage.color + 0x202020);
 			// draw the progress bar as a rectangle covering a percentage of the screen's background
 			graphics.drawRect(0, 0, complete * screenWidth, screenHeight);
+			// draw gradient circles from the bottom corners that adjust to the channels peaking levels
+			var matrix:Matrix = new Matrix;
+			// left
+			matrix.createGradientBox(screenWidth*2, screenWidth*2, 0, 0 - screenWidth, screenHeight - screenWidth);
+			if (channel != null) {
+				graphics.beginGradientFill(GradientType.RADIAL,[0xAAFFAA, 0xCCFFCC], 
+					[0.3, 0], [0, 255 * channel.leftPeak], matrix);
+				graphics.drawCircle(0, screenHeight, screenWidth);
+			}
+			// right
+			matrix.createGradientBox(screenWidth*2, screenWidth*2, 0, 0, screenHeight - screenWidth);
+			if (channel != null) {
+				graphics.beginGradientFill(GradientType.RADIAL,[0xAAAAFF, 0xCCCCFF], 
+					[0.3, 0], [0, 255 * channel.leftPeak], matrix);
+				graphics.drawCircle(screenWidth, screenHeight, screenWidth);
+			}
 		}
 	}
 }
