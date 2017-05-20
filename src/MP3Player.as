@@ -165,10 +165,10 @@ package
 					playSong();
 				}
 			}
-			//drawButtons();
+			drawButtons();
 		}
 		/**
-		 * A simpler helper function to start playing the song.<br>
+		 * A simple helper function to start playing the song.<br>
 		 * Also attaches the listener for the sound complete event.
 		 */
 		private function playSong():void {
@@ -195,9 +195,13 @@ package
 			isPlaying = false;
 			drawButtons();
 		}
-		
+		/**
+		 * This function is called regularly by an event timer to draw a progress bar across the
+		 * background of the app.
+		 */
 		private function drawProgress(event:TimerEvent):void {
 			graphics.clear();
+			// calculate what position in the song we are at
 			var complete:Number;
 			if (channel == null || (!isPlaying && pausePosition == 0)) {
 				complete = 0;
@@ -210,8 +214,8 @@ package
 				((0x002000 * (1 - complete)) & 0x00FF00) + 				// green
 				((0x20 * (1 - complete)) & 0x0000FF);					// blue
 			graphics.beginFill(stage.color + 0x202020);
+			// draw the progress bar as a rectangle covering a percentage of the screen's background
 			graphics.drawRect(0, 0, complete * screenWidth, screenHeight);
-			drawButtons();
 		}
 	}
 }
