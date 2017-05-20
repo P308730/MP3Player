@@ -192,7 +192,12 @@ package
 			} else {
 				complete = channel.position / sound.length;
 			}
-			graphics.beginFill(0x404040);
+			// as the progress bar advances, the colour darkens such that the colour of the progress
+			// bar at 100% is the same as the background was at 0%
+			stage.color = ((0x200000 * (1 - complete)) & 0xFF0000) + 	// red
+				((0x002000 * (1 - complete)) & 0x00FF00) + 				// green
+				((0x20 * (1 - complete)) & 0x0000FF);					// blue
+			graphics.beginFill(stage.color + 0x202020);
 			graphics.drawRect(0, 0, complete * screenWidth, screenHeight);
 			drawButtons();
 		}
