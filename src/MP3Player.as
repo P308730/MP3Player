@@ -5,9 +5,9 @@ package
 	import flash.display.StageAlign;
 	import flash.display.StageScaleMode;
 	import flash.events.*;
-	import flash.events.MouseEvent;
 	import flash.media.Sound;
 	import flash.media.SoundChannel;
+	import flash.utils.Timer;
 	
 	import flashx.textLayout.formats.BackgroundColor;
 	
@@ -36,6 +36,8 @@ package
 		private var screenWidth:int;
 		private var screenHeight:int;
 		
+		private var progressMeter:Timer;
+		
 		public function MP3Player()
 		{
 			super();
@@ -63,6 +65,11 @@ package
 			pauseButton.addEventListener(MouseEvent.MOUSE_DOWN, onButtonTouchDown);
 			stopButton.addEventListener(MouseEvent.MOUSE_DOWN, onButtonTouchDown);
 			
+			progressMeter = new Timer(30);
+			progressMeter.start();
+			progressMeter.addEventListener(TimerEvent.TIMER, drawProgress);
+			
+			
 		}
 		/**
 		 * A function to draw the buttons using the graphics objects of each of the button
@@ -73,6 +80,7 @@ package
 			var colourPlay:uint;
 			var colourPause:uint;
 			var colourStop:uint;
+			var alpha:Number = 0.75;
 			// change colour depending on MP3 player's current state
 			if (isPlaying) {
 				colourPlay = 0x80F080;
@@ -95,7 +103,7 @@ package
 			// play button
 			var g:Graphics = playButton.graphics;
 			g.clear();
-			g.beginFill(colourPlay);
+			g.beginFill(colourPlay, alpha);
 			g.drawCircle(screenWidth / 4, screenHeight / 2, r1);
 			g.beginFill(colourPlay - 0x400040);
 			var a:uint = r2 * Math.sin(Math.PI / 6);
@@ -106,7 +114,7 @@ package
 			// pause button
 			g = pauseButton.graphics;
 			g.clear();
-			g.beginFill(colourPause);
+			g.beginFill(colourPause, alpha);
 			g.drawCircle(screenWidth / 2, screenHeight / 2, r1);
 			g.beginFill(colourPause - 0x000080);
 			g.drawRect(screenWidth / 2 - r3, screenHeight / 2 - r3, r3 * 2 / 3, 2 * r3);
@@ -114,7 +122,7 @@ package
 			// stop button
 			g = stopButton.graphics;
 			g.clear();
-			g.beginFill(colourStop);
+			g.beginFill(colourStop, alpha);
 			g.drawCircle(screenWidth / 4 * 3, screenHeight / 2, r1);
 			g.beginFill(colourStop - 0x004040);
 			g.drawRect(screenWidth / 4 * 3 - r3, screenHeight / 2 - r3, 2 * r3, 2 * r3);
@@ -173,6 +181,19 @@ package
 		private function onSongEnd(event:Event):void {
 			pausePosition = 0;
 			isPlaying = false;
+			drawButtons();
+		}
+		
+		private function drawProgress(event:TimerEvent):void {
+			graphics.clear();
+			var complete:Number;
+			if (channel == null || (!isPlaying && pausePosition == 0)) {
+				complete = 0;
+			} else {
+				complete = channel.position / sound.length;
+			}
+			graphics.beginFill(0x404040);
+			graphics.drawRect(0, 0, complete * screenWidth, screenHeight);
 			drawButtons();
 		}
 	}
