@@ -10,6 +10,7 @@ package
 	import flash.media.Sound;
 	import flash.media.SoundChannel;
 	import flash.media.SoundTransform;
+	import flash.text.TextField;
 	import flash.utils.Timer;
 	
 	import flashx.textLayout.formats.BackgroundColor;
@@ -17,7 +18,7 @@ package
 	/**
 	 * This class implements a very simple MP3 player.<br>
 	 * This program implements the requirements of the Portfolio Question 4 for the Programming II AS3 Unit.
-	 * This code borrows heavily from the SoundPlayPauseStopDemo example provided in the course materials. 
+	 * This code borrows from the SoundPlayPauseStopDemo example provided in the course materials. 
 	 * @author Stephen Whitely P308730
 	 */
 	public class MP3Player extends Sprite
@@ -42,7 +43,7 @@ package
 		private var screenWidth:int;
 		private var screenHeight:int;
 		
-		private var progressMeter:Timer;
+		private var stageAnimator:Timer;
 		
 		private var touchedBackground:Boolean = false;
 		private var xDown:int, yDown:int;
@@ -54,11 +55,12 @@ package
 			// support autoOrients
 			stage.align = StageAlign.TOP_LEFT;
 			stage.scaleMode = StageScaleMode.NO_SCALE;
-			// get the width and height for 
-			screenWidth = stage.fullScreenWidth;
-			screenHeight = stage.fullScreenHeight;
+			
+			// get the width and height
+			//screenWidth = stage.stageWidth;
+			//screenHeight = stage.stageHeight;
 			// set the stage background colour
-			stage.color = 0x202020;
+			stage.color = 0x202020;	
 			// initialise the buttons as Sprite objects
 			playButton = new Sprite();
 			pauseButton = new Sprite();
@@ -67,24 +69,23 @@ package
 			addChild(playButton);
 			addChild(pauseButton);
 			addChild(stopButton);
-			// draw the buttons
-			drawButtons();			
 			// three events share one event handler
 			playButton.addEventListener(MouseEvent.MOUSE_DOWN, onButtonTouchDown);
 			pauseButton.addEventListener(MouseEvent.MOUSE_DOWN, onButtonTouchDown);
 			stopButton.addEventListener(MouseEvent.MOUSE_DOWN, onButtonTouchDown);
 			stage.addEventListener(MouseEvent.MOUSE_DOWN, onButtonTouchDown);
-			
+			// add listener for mouse up
 			stage.addEventListener(MouseEvent.MOUSE_UP, onTouchUp);
+			// add the timer to draw the stage
+			stageAnimator = new Timer(30);
+			stageAnimator.start();
+			stageAnimator.addEventListener(TimerEvent.TIMER, drawStage);	
 			
-			progressMeter = new Timer(30);
-			progressMeter.start();
-			progressMeter.addEventListener(TimerEvent.TIMER, drawStage);
-			
-			
+			// you may note that I haven't set stageWidth and stageHeight in here - that's
+			// because they don't return correct values when called in the constructor
 		}
 		/**
-		 * A function to draw the buttons using the graphics objects of each of the button
+		 * A method to draw the buttons using the graphics objects of each of the button
 		 * (Sprite) objects.
 		 */
 		private function drawButtons():void {
@@ -207,16 +208,17 @@ package
 		}
 		
 		/**
-		 * A simple helper function to start playing the song.<br>
+		 * A simple helper method to start playing the song.<br>
 		 * Also attaches the listener for the sound complete event.
 		 */
 		private function playSong():void {
 			channel = sound.play(pausePosition);
 			channel.addEventListener(Event.SOUND_COMPLETE, onSongEnd);
 			isPlaying = true;
+			stageAnimator.start();
 		}
 		/**
-		 * A simple helper function to stop playing the song.
+		 * A simple helper method to stop playing the song.
 		 */
 		private function stopSong():void {
 			// not sure if I have to remove this event listener but I don't want lost 
@@ -224,9 +226,10 @@ package
 			channel.removeEventListener(Event.SOUND_COMPLETE, onSongEnd);
 			channel.stop();
 			isPlaying = false;
+			stageAnimator.stop();
 		}
 		/**
-		 * This function is called when sound channel detects a sound complete event. <br>
+		 * This method is called when sound channel detects a sound complete event. <br>
 		 * It resets the playing position and state boolean as well as redrawing the buttons.
 		 */
 		private function onSongEnd(event:Event):void {
@@ -235,10 +238,13 @@ package
 			drawButtons();
 		}
 		/**
-		 * This function is called regularly by an event timer to draw a progress bar across the
+		 * This method is called regularly by an event timer to draw a progress bar across the
 		 * background of the app and the peak displays
 		 */
 		private function drawStage(event:TimerEvent):void {
+			// good time to update the width and height
+			screenWidth = stage.stageWidth;
+			screenHeight = stage.stageHeight;
 			graphics.clear();
 			// calculate what position in the song we are at
 			var complete:Number;
@@ -271,6 +277,7 @@ package
 					[0.3, 0], [0, 255 * channel.leftPeak], matrix);
 				graphics.drawCircle(screenWidth, screenHeight, screenWidth);
 			}
+			drawButtons();
 		}
 	}
 }
