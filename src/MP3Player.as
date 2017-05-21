@@ -53,7 +53,9 @@ package
 		private var stageAnimator:Timer;
 		
 		private var touchedBackground:Boolean = false;
-		private var xDown:int, yDown:int;		
+		private var xDown:int, yDown:int;
+		
+		private var peakLeft:Number, peakRight:Number;
 		
 		public function MP3Player()
 		{
@@ -241,7 +243,6 @@ package
 			// new SoundChannel object needs a new event listener
 			channel.addEventListener(Event.SOUND_COMPLETE, onSongEnd);
 			isPlaying = true;
-			//stageAnimator.start();
 		}
 		/**
 		 * A simple helper method to stop playing the song.
@@ -249,7 +250,6 @@ package
 		private function stopSong():void {
 			channel.stop();
 			isPlaying = false;
-			//stageAnimator.stop();
 		}
 		/**
 		 * This method is called when sound channel detects a sound complete event. <br>
@@ -294,17 +294,25 @@ package
 			// draw gradient circles from the bottom corners that adjust to the channels peaking levels
 			var matrix:Matrix = new Matrix;
 			// left
+			var oldPeak:Number = peakLeft;
 			matrix.createGradientBox(screenWidth*2, screenWidth*2, 0, 0 - screenWidth, screenHeight - screenWidth);
 			if (channel != null) {
-				graphics.beginGradientFill(GradientType.RADIAL,[0xAAFFAA, 0xCCFFCC], 
-					[0.3, 0], [0, 255 * channel.leftPeak], matrix);
+				peakLeft = channel.leftPeak;
+				if (!isPlaying) peakLeft += (oldPeak - peakLeft) * 0.75;
+				graphics.beginGradientFill(GradientType.RADIAL,
+					[0xAAFFAA, 0xAAFFAA, (peakLeft > 0.5)?0xFFA040:0xCCFFCC], 
+					[0.3, 0.2, 0], [0, 128 * peakLeft,255 * peakLeft], matrix);
 				graphics.drawCircle(0, screenHeight, screenWidth);
 			}
 			// right
+			oldPeak = peakRight;
 			matrix.createGradientBox(screenWidth*2, screenWidth*2, 0, 0, screenHeight - screenWidth);
 			if (channel != null) {
-				graphics.beginGradientFill(GradientType.RADIAL,[0xAAAAFF, 0xCCCCFF], 
-					[0.3, 0], [0, 255 * channel.rightPeak], matrix);
+				peakRight = channel.rightPeak;
+				if (!isPlaying) peakRight += (oldPeak - peakRight) * 0.75;
+				graphics.beginGradientFill(GradientType.RADIAL,
+					[0xAAAAFF, 0xAAAAFF, (peakRight > 0.5)?0xFF40A0:0xCCCCFF], 
+					[0.3, 0.2, 0], [0, 128 * peakRight,  255 * peakRight], matrix);
 				graphics.drawCircle(screenWidth, screenHeight, screenWidth);
 			}
 			drawButtons();
