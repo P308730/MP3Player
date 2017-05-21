@@ -19,7 +19,10 @@ package
 	 * This class implements a very simple MP3 player.<br>
 	 * This program implements the requirements of the Portfolio Question 4 for the Programming II AS3 Unit.
 	 * This code borrows from the SoundPlayPauseStopDemo example provided in the course materials. 
+	 * On top of the original specifications, the app now shows the position of the song as an animation,
+	 * has swipe controls for volume and next/previous track, multiple tracks, and stereo peaking animations.
 	 * @author Stephen Whitely P308730
+	 * @version 2.0
 	 */
 	public class MP3Player extends Sprite
 	{
