@@ -29,6 +29,7 @@ package
 		[Embed(source='assets/Chrono Trigger Medley.mp3')]
 		public var MySound2:Class;
 		private var trackNum:int = 0;
+		private var trackCount:int = 2;
 		
 		// a Sound instance from the MySound class (embedded mp3 file)
 		private var sound:Sound = new MySound;
@@ -49,7 +50,7 @@ package
 		private var stageAnimator:Timer;
 		
 		private var touchedBackground:Boolean = false;
-		private var xDown:int, yDown:int;
+		private var xDown:int, yDown:int;		
 		
 		public function MP3Player()
 		{
@@ -204,21 +205,18 @@ package
 					}
 					soundTrans.volume = volume;
 					channel.soundTransform = soundTrans;
+				// if user has moved finger/mouse horizontally, change track
 				} else if (Math.abs(xDown - event.localX) > screenWidth / 8) {
-					trackNum = (trackNum + 1)%2;
+					if (event.localX > xDown) {
+						trackNum = (trackNum + 1)%trackCount;
+					} else {
+						trackNum = (trackNum - 1)%trackCount;
+						if (trackNum < 0) trackNum *= -1;
+					}
 					var wasPlaying:Boolean = isPlaying;
 					if (channel != null) stopSong();
 					pausePosition = 0;
-					switch (trackNum) {
-						case 0:
-							sound = new MySound;
-							break;
-						case 1:
-							sound = new MySound2;
-							break;
-						default:
-							sound = new MySound;
-					}
+					changeTrack();
 					if (wasPlaying) playSong();
 				// otherwise seek to position
 				} else if (isPlaying) {
@@ -237,6 +235,7 @@ package
 		 */
 		private function playSong():void {
 			channel = sound.play(pausePosition);
+			// new SoundChannel object needs a new event listener
 			channel.addEventListener(Event.SOUND_COMPLETE, onSongEnd);
 			isPlaying = true;
 			stageAnimator.start();
@@ -245,9 +244,6 @@ package
 		 * A simple helper method to stop playing the song.
 		 */
 		private function stopSong():void {
-			// not sure if I have to remove this event listener but I don't want lost 
-			// listeners from no-longer referenced objects cluttering up the memory
-			channel.removeEventListener(Event.SOUND_COMPLETE, onSongEnd);
 			channel.stop();
 			isPlaying = false;
 			stageAnimator.stop();
@@ -258,8 +254,14 @@ package
 		 */
 		private function onSongEnd(event:Event):void {
 			pausePosition = 0;
-			isPlaying = false;
-			drawButtons();
+			if (trackNum + 1 < trackCount) {
+				trackNum++;
+				changeTrack();
+				playSong();
+			} else {
+				isPlaying = false;
+				drawButtons();
+			}
 		}
 		/**
 		 * This method is called regularly by an event timer to draw a progress bar across the
@@ -279,10 +281,10 @@ package
 			}
 			// as the progress bar advances, the colour darkens such that the colour of the progress
 			// bar at 100% is the same as the background was at 0%
-			stage.color = ((0x200000 * (1 - complete)) & 0xFF0000) + 	// red
-				((0x002000 * (1 - complete)) & 0x00FF00) + 				// green
-				((0x20 * (1 - complete)) & 0x0000FF);					// blue
-			graphics.beginFill(stage.color + 0x202020);
+			stage.color = ((0x100000 * (1 - complete)) & 0xFF0000) + 	// red
+				((0x001000 * (1 - complete)) & 0x00FF00) + 				// green
+				((0x10 * (1 - complete)) & 0x0000FF);					// blue
+			graphics.beginFill(stage.color + 0x101010);
 			// draw the progress bar as a rectangle covering a percentage of the screen's background
 			graphics.drawRect(0, 0, complete * screenWidth, screenHeight);
 			// draw gradient circles from the bottom corners that adjust to the channels peaking levels
@@ -298,7 +300,7 @@ package
 			matrix.createGradientBox(screenWidth*2, screenWidth*2, 0, 0, screenHeight - screenWidth);
 			if (channel != null) {
 				graphics.beginGradientFill(GradientType.RADIAL,[0xAAAAFF, 0xCCCCFF], 
-					[0.3, 0], [0, 255 * channel.leftPeak], matrix);
+					[0.3, 0], [0, 255 * channel.rightPeak], matrix);
 				graphics.drawCircle(screenWidth, screenHeight, screenWidth);
 			}
 			drawButtons();
@@ -315,6 +317,21 @@ package
 		 */
 		private function gainedFocus(event:Event):void {
 			stageAnimator.start();
+		}
+		/**
+		 * A private helper function for changing tracks. Needs to be updated if more tracks are added.
+		 */
+		private function changeTrack():void {
+			switch (trackNum) {
+				case 0:
+					sound = new MySound;
+					break;
+				case 1:
+					sound = new MySound2;
+					break;
+				default:
+					sound = new MySound;
+			}
 		}
 	}
 }
