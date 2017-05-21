@@ -77,12 +77,17 @@ package
 			// add listener for mouse up
 			stage.addEventListener(MouseEvent.MOUSE_UP, onTouchUp);
 			// add the timer to draw the stage
-			stageAnimator = new Timer(30);
+			stageAnimator = new Timer(66);
 			stageAnimator.start();
-			stageAnimator.addEventListener(TimerEvent.TIMER, drawStage);	
+			stageAnimator.addEventListener(TimerEvent.TIMER, drawStage);
+			// add listeneres for losing and gaining focus
+			// I have currently disabled these so that the app continues to animate in a split screen mode
+			//stage.addEventListener(Event.DEACTIVATE, lostFocus);
+			//stage.addEventListener(Event.ACTIVATE, gainedFocus);
 			
 			// you may note that I haven't set stageWidth and stageHeight in here - that's
-			// because they don't return correct values when called in the constructor
+			// because they don't return correct values when called in the constructor so
+			// I have to wait until the first iteration of the timer to get valid values.
 		}
 		/**
 		 * A method to draw the buttons using the graphics objects of each of the button
@@ -278,6 +283,19 @@ package
 				graphics.drawCircle(screenWidth, screenHeight, screenWidth);
 			}
 			drawButtons();
+		}
+		/**
+		 * This event listener called method stops drawing the stage when the app loses focus
+		 * in order to save some CPU cycles.
+		 */
+		private function lostFocus(event:Event):void {
+			stageAnimator.stop();
+		}
+		/**
+		 * This event listener called method starts drawing again when the app regains focus 
+		 */
+		private function gainedFocus(event:Event):void {
+			stageAnimator.start();
 		}
 	}
 }
