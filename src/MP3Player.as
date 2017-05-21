@@ -26,6 +26,9 @@ package
 		// embed the mp3
 		[Embed(source='assets/Chrono Trigger.mp3')]
 		public var MySound:Class;
+		[Embed(source='assets/Chrono Trigger Medley.mp3')]
+		public var MySound2:Class;
+		private var trackNum:int = 0;
 		
 		// a Sound instance from the MySound class (embedded mp3 file)
 		private var sound:Sound = new MySound;
@@ -201,6 +204,22 @@ package
 					}
 					soundTrans.volume = volume;
 					channel.soundTransform = soundTrans;
+				} else if (Math.abs(xDown - event.localX) > screenWidth / 8) {
+					trackNum = (trackNum + 1)%2;
+					var wasPlaying:Boolean = isPlaying;
+					if (channel != null) stopSong();
+					pausePosition = 0;
+					switch (trackNum) {
+						case 0:
+							sound = new MySound;
+							break;
+						case 1:
+							sound = new MySound2;
+							break;
+						default:
+							sound = new MySound;
+					}
+					if (wasPlaying) playSong();
 				// otherwise seek to position
 				} else if (isPlaying) {
 					// stop before playing again just to clean up event listeners
