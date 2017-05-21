@@ -286,7 +286,8 @@ package
 			// bar at 100% is the same as the background was at 0%
 			stage.color = ((0x100000 * (1 - complete)) & 0xFF0000) + 	// red
 				((0x001000 * (1 - complete)) & 0x00FF00) + 				// green
-				((0x10 * (1 - complete)) & 0x0000FF);					// blue
+				((0x10 * (1 - complete)) & 0x0000FF) + 					// blue
+				0x101010;
 			graphics.beginFill(stage.color + 0x101010);
 			// draw the progress bar as a rectangle covering a percentage of the screen's background
 			graphics.drawRect(0, 0, complete * screenWidth, screenHeight);
