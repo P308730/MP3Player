@@ -241,7 +241,7 @@ package
 			// new SoundChannel object needs a new event listener
 			channel.addEventListener(Event.SOUND_COMPLETE, onSongEnd);
 			isPlaying = true;
-			stageAnimator.start();
+			//stageAnimator.start();
 		}
 		/**
 		 * A simple helper method to stop playing the song.
@@ -249,7 +249,7 @@ package
 		private function stopSong():void {
 			channel.stop();
 			isPlaying = false;
-			stageAnimator.stop();
+			//stageAnimator.stop();
 		}
 		/**
 		 * This method is called when sound channel detects a sound complete event. <br>
