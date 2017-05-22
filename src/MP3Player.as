@@ -295,25 +295,25 @@ package
 			var matrix:Matrix = new Matrix;
 			// left
 			var oldPeak:Number = peakLeft;
-			matrix.createGradientBox(screenWidth*2, screenWidth*2, 0, 0 - screenWidth, screenHeight - screenWidth);
+			matrix.createGradientBox(screenWidth*2, screenWidth*2, 0, 0 - screenWidth, screenHeight - screenWidth + 10);
 			if (channel != null) {
 				peakLeft = channel.leftPeak;
 				if (!isPlaying) peakLeft += (oldPeak - peakLeft) * 0.75;
 				graphics.beginGradientFill(GradientType.RADIAL,
-					[0xAAFFAA, 0xAAFFAA, (peakLeft > 0.5)?0xFFA040:0xCCFFCC], 
-					[0.3, 0.2, 0], [0, 128 * peakLeft,255 * peakLeft], matrix);
-				graphics.drawCircle(0, screenHeight, screenWidth);
+					[0, 0xAAFFAA, 0xAAFFAA, (peakLeft > 0.5)?0xFFA040:0xCCFFCC], 
+					[0, 0.6, 0.4, 0], [0, 64 * peakLeft, 128 * peakLeft,255 * peakLeft], matrix);
+				graphics.drawCircle(0, screenHeight + 10, screenWidth);
 			}
 			// right
 			oldPeak = peakRight;
-			matrix.createGradientBox(screenWidth*2, screenWidth*2, 0, 0, screenHeight - screenWidth);
+			matrix.createGradientBox(screenWidth*2, screenWidth*2, 0, 0, screenHeight - screenWidth + 10);
 			if (channel != null) {
 				peakRight = channel.rightPeak;
-				if (!isPlaying) peakRight += (oldPeak - peakRight) * 0.75;
+				if (!isPlaying) peakRight += (oldPeak - peakRight) * 0.85;
 				graphics.beginGradientFill(GradientType.RADIAL,
-					[0xAAAAFF, 0xAAAAFF, (peakRight > 0.5)?0xFF40A0:0xCCCCFF], 
-					[0.3, 0.2, 0], [0, 128 * peakRight,  255 * peakRight], matrix);
-				graphics.drawCircle(screenWidth, screenHeight, screenWidth);
+					[0, 0xAAAAFF, 0xAAAAFF, (peakRight > 0.5)?0xFF40A0:0xCCCCFF], 
+					[0, 0.6, 0.4, 0], [0, 64 * peakRight, 128 * peakRight,  255 * peakRight], matrix);
+				graphics.drawCircle(screenWidth, screenHeight + 10, screenWidth);
 			}
 			drawButtons();
 		}
